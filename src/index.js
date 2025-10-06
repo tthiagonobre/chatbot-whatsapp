@@ -1,31 +1,45 @@
-// Importa o framework Express
+// Carrega as variáveis de ambiente do arquivo .env
+require('dotenv').config();
+
 const express = require('express');
+const twilio = require('twilio');
 
-// Cria uma instância do aplicativo Express
+// Pega as credenciais da Twilio do arquivo .env
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+
+// Inicia o cliente da Twilio
+const client = twilio(accountSid, authToken);
+
 const app = express();
-
-// **NOVO**: Adiciona um middleware para o Express entender dados de formulário
-// A Twilio envia os dados nesse formato
 app.use(express.urlencoded({ extended: true }));
 
-// Define a porta em que o servidor vai rodar. 3000 é um padrão comum.
 const PORT = 3000;
 
-// Rota principal para testar se o servidor está funcionando
 app.get('/', (req, res) => {
   res.send('Servidor do Chatbot está no ar!');
 });
 
-// **NOVO**: Cria a rota do Webhook que vai receber as mensagens da Twilio
 app.post('/webhook', (req, res) => {
-  console.log('Mensagem recebida da Twilio!');
-  console.log(req.body); // Mostra todos os dados que a Twilio enviou
+  console.log('Mensagem recebida:', req.body.Body);
 
-  // Por enquanto, não vamos responder nada, apenas registrar a mensagem.
+  const sender = req.body.From; // Número de quem enviou
+  const twilioNumber = req.body.To; // Seu número da Twilio
+  const messageBody = "Obrigado por sua mensagem! Recebemos: '" + req.body.Body + "'";
+
+  // Envia uma resposta via Twilio
+  client.messages
+    .create({
+      body: messageBody,
+      from: twilioNumber,
+      to: sender
+    })
+    .then(message => console.log('Resposta enviada! SID:', message.sid))
+    .catch(error => console.error('Erro ao enviar resposta:', error));
+
   res.status(200).send();
 });
 
-// Inicia o servidor e o faz "escutar" por requisições na porta definida
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
