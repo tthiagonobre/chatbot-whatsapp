@@ -1,7 +1,11 @@
 {
   "dependencies": {
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "mercadopago": "^2.9.0",
+    "mongoose": "^8.19.0",
     "twilio": "^5.10.2"
   }
 }
